@@ -1,0 +1,86 @@
+version: "3.8"
+services:
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    environment:
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+      OPENSEARCH_HOSTS: '["http://opensearch-node1:9200","http://opensearch-node2:9200","http://opensearch-node3:9200"]'
+    ports:
+      - 5601:5601
+    networks:
+      - opensearch-net
+    logging:
+      driver: json-file
+  opensearch-node1:
+    image: opensearchproject/opensearch:latest
+    environment:
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      bootstrap.memory_lock: "false"
+      cluster.initial_cluster_manager_nodes: opensearch-node1,opensearch-node2,opensearch-node3
+      cluster.name: opensearch-cluster
+      discovery.seed_hosts: opensearch-node1,opensearch-node2,opensearch-node3
+      node.name: opensearch-node1
+    volumes:
+      - opensearch-data1:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vagrant1
+  opensearch-node2:
+    image: opensearchproject/opensearch:latest
+    environment:
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      bootstrap.memory_lock: "false"
+      cluster.initial_cluster_manager_nodes: opensearch-node1,opensearch-node2,opensearch-node3
+      cluster.name: opensearch-cluster
+      discovery.seed_hosts: opensearch-node1,opensearch-node2,opensearch-node3
+      node.name: opensearch-node2
+    volumes:
+      - opensearch-data2:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vagrant2
+  opensearch-node3:
+    image: opensearchproject/opensearch:latest
+    environment:
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      bootstrap.memory_lock: "false"
+      cluster.initial_cluster_manager_nodes: opensearch-node1,opensearch-node2,opensearch-node3
+      cluster.name: opensearch-cluster
+      discovery.seed_hosts: opensearch-node1,opensearch-node2,opensearch-node3
+      node.name: opensearch-node3
+    volumes:
+      - opensearch-data3:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vagrant3
+networks:
+  opensearch-net:
+    driver: overlay
+volumes:
+  opensearch-data1:
+    driver: local
+  opensearch-data2:
+    driver: local
+  opensearch-data3:
+    driver: local
